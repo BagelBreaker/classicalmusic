@@ -19,21 +19,26 @@ for composer in composerList:
             
             noteNames = []
             noteRhythms = []
+            noteNamesString = ""
+            noteRhythmsString = ""
             for n in s.recurse():
                 if isinstance(n,chord.Chord):
                     #If the note is a chord then we choose the top note
                     noteNames.append(n.sortAscending().pitches[-1].nameWithOctave)
+                    noteNamesString += n.sortAscending().pitches[-1].nameWithOctave + " "
                 elif isinstance(n,note.Note):
                     noteNames.append(n.nameWithOctave)
+                    noteNamesString += n.nameWithOctave + " "
                 noteRhythms.append(n.quarterLength)
-                    
-            
+                noteRhythmsString += str(n.quarterLength) + " "
+
+
             pieces[str(mf)] = {
                 'composer': composer,
                 'key': key.tonic.name,
                 'mode': key.mode,
-                'notes': noteNames,
-                'rhythms': noteRhythms
+                'notes': noteNamesString,
+                'rhythms': noteRhythmsString
             }
             print(f"Processed {mf}")
         except Exception as e:
