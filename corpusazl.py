@@ -6,7 +6,8 @@ import os, json, traceback
 #composer
 #year
 pieces = {}
-composerList = ['mozart'] # and so on... ADD THIS LATER
+# composerList = ['bach','beethoven','chopin','coreli','handel','haydn','joplin','monteverdi','mozart','palestrina','schumann_clara','schumann_robert','verdi'] # and so on... ADD THIS LATER
+composerList = ['mozart']
 OUT_FILE = os.path.join(os.path.dirname(__file__), 'notes.json')
 for composer in composerList:
     paths = corpus.getComposer(composer)
@@ -16,20 +17,32 @@ for composer in composerList:
             s = corpus.parse(mf)
             key = s.analyze('key')
             notes = s.flatten().notes
-            
+            title = s.metadata.title or s.metadata.movementName or s.metadata.movementNumber or None
+
             noteNames = []
             noteRhythms = []
             noteNamesString = ""
             noteRhythmsString = ""
             for n in s.recurse():
+                if hasattr(n,'tie') and n.tie is not None:
+                    
+                    if hasattr(n,'staccato') or hasattr(n,'tenuto') or n.tie.type != 'stop':
+                        print("tie found, skipping", n.nameWithOctave)
+                    else:
+                        if isinstance(n,chord.Chord):
+                            noteNamesString+=n.sortAscending().pitches[-1].nameWithOctave+""
+                        else:
+                            noteNamesString += n.nameWithOctave + " "
+                        print("tie found, adding",n.nameWithOctave)
+                        
                 if isinstance(n,chord.Chord):
                     #If the note is a chord then we choose the top note
-                    noteNames.append(n.sortAscending().pitches[-1].nameWithOctave)
+                    # noteNames.append(n.sortAscending().pitches[-1].nameWithOctave)
                     noteNamesString += n.sortAscending().pitches[-1].nameWithOctave + " "
                 elif isinstance(n,note.Note):
-                    noteNames.append(n.nameWithOctave)
+                    # noteNames.append(n.nameWithOctave)
                     noteNamesString += n.nameWithOctave + " "
-                noteRhythms.append(n.quarterLength)
+                # noteRhythms.append(n.quarterLength)
                 noteRhythmsString += str(n.quarterLength) + " "
 
 
@@ -38,7 +51,8 @@ for composer in composerList:
                 'key': key.tonic.name,
                 'mode': key.mode,
                 'notes': noteNamesString,
-                'rhythms': noteRhythmsString
+                'rhythms': noteRhythmsString,
+                'title': title
             }
             print(f"Processed {mf}")
         except Exception as e:
