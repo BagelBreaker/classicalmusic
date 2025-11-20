@@ -18,16 +18,19 @@ for composer in composerList:
             key = s.analyze('key')
             notes = s.flatten().notes
             title = s.metadata.title or s.metadata.movementName or s.metadata.movementNumber or None
-
-            noteNames = []
-            noteRhythms = []
+            a = None
+            if s.parts:
+                s = s.parts[0].flatten()
             noteNamesString = ""
             noteRhythmsString = ""
             for n in s.recurse():
                 if hasattr(n,'tie') and n.tie is not None:
                     
                     if hasattr(n,'staccato') or hasattr(n,'tenuto') or n.tie.type != 'stop':
-                        print("tie found, skipping", n.nameWithOctave)
+                        if isinstance(n,chord.Chord):
+                            print("tie found, skipping", n.sortAscending().pitches[-1].nameWithOctave)
+                        else:
+                            print("tie found, skipping", n.nameWithOctave)
                     else:
                         if isinstance(n,chord.Chord):
                             noteNamesString+=n.sortAscending().pitches[-1].nameWithOctave+""
