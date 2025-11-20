@@ -16,14 +16,21 @@ for composer in composerList:
             print("Processing:", mf)
             s = corpus.parse(mf)
             key = s.analyze('key')
-            notes = s.flatten().notes
+            a = None
             title = s.metadata.title or s.metadata.movementName or s.metadata.movementNumber or None
+            if s.parts and len(s.parts) > 0:
+                a = s.parts[0]
+                print("First part accessed")
+            else:
+                a = s
+            # notes = s.flatten().notes
+
 
             noteNames = []
             noteRhythms = []
             noteNamesString = ""
             noteRhythmsString = ""
-            for n in s.recurse():
+            for n in a.recurse():
                 if hasattr(n,'tie') and n.tie is not None:
                     
                     if hasattr(n,'staccato') or hasattr(n,'tenuto') or n.tie.type != 'stop':
@@ -34,7 +41,7 @@ for composer in composerList:
                         else:
                             noteNamesString += n.nameWithOctave + " "
                         print("tie found, adding",n.nameWithOctave)
-                        
+                    continue
                 if isinstance(n,chord.Chord):
                     #If the note is a chord then we choose the top note
                     # noteNames.append(n.sortAscending().pitches[-1].nameWithOctave)
