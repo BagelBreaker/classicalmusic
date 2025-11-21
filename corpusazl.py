@@ -5,6 +5,10 @@ import os, json, traceback
 #notes
 #composer
 #year
+def check_zeroes(b):
+    if b == 0:
+        return False
+    return True
 pieces = {}
 # composerList = ['bach','beethoven','chopin','coreli','handel','haydn','joplin','monteverdi','mozart','palestrina','schumann_clara','schumann_robert','verdi'] # and so on... ADD THIS LATER
 composerList = ['mozart']
@@ -31,6 +35,7 @@ for composer in composerList:
             noteNamesString = ""
             noteRhythmsString = ""
             for n in a.recurse():
+                ql = None
                 if hasattr(n,'tie') and n.tie is not None:
                     
                     if hasattr(n,'staccato') or hasattr(n,'tenuto') or n.tie.type != 'stop':
@@ -41,6 +46,13 @@ for composer in composerList:
                         else:
                             noteNamesString += n.nameWithOctave + " "
                         print("tie found, adding",n.nameWithOctave)
+                        ql = round(n.quarterLength,3)
+                        if check_zeroes(ql) == False:
+                            continue
+                        noteRhythmsString+=str(ql)+" "
+                    continue
+                elif isinstance(n, note.Rest):
+                    noteNamesString+="R "
                     continue
                 if isinstance(n,chord.Chord):
                     #If the note is a chord then we choose the top note
@@ -50,7 +62,11 @@ for composer in composerList:
                     # noteNames.append(n.nameWithOctave)
                     noteNamesString += n.nameWithOctave + " "
                 # noteRhythms.append(n.quarterLength)
-                noteRhythmsString += str(n.quarterLength) + " "
+                ql = n.quarterLength
+                ql = round(ql,3)
+                if check_zeroes(ql) == False:
+                    continue
+                noteRhythmsString += str(ql) + " "
 
 
             pieces[str(mf)] = {
